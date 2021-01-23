@@ -7,11 +7,11 @@ export class DcsServerController {
 
   @Get('stop')
   async stop() {
-    return await this.pms.stop();
+    await this.pms.stop();
   }
 
   @Get('start')
   async start() {
-    return await this.pms.start();
+    await this.pms.start();
   }
 }
