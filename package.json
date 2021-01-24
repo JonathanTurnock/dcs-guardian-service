@@ -5,12 +5,13 @@
   "author": "Jonathan Turnock <Jonathan.Turnock@outlook.com>",
   "private": true,
   "license": "UNLICENSED",
-  "bin": "build/main.js",
+  "bin": "dist/apps/dcs-server-guardian/main.js",
   "scripts": {
     "prebuild": "yarn clean",
     "clean": "rimraf build dist",
-    "build": "nest build && pkg . --targets win --out-dir dist",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "build": "nest build && pkg . --targets win --out-dir dist --debug",
+    "build:stub": "nest build dcs-stub && pkg dist/apps/dcs-stub/main.js --targets win --output dist/DCS.exe",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -20,7 +21,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/dcs-server-guardian/test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.5.1",
@@ -30,7 +31,9 @@
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/terminus": "^7.0.1",
     "execa": "^5.0.0",
+    "fkill": "^7.1.0",
     "fs-extra": "^9.1.0",
+    "ps-list": "^7.2.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3"
@@ -66,7 +69,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -74,7 +77,15 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/"
+    ]
+  },
+  "pkg": {
+    "assets": [
+      "node_modules/ps-list/vendor/*"
+    ]
   }
 }

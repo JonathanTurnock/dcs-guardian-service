@@ -1,9 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DcsServerClientService } from './dcs-server-client.service';
-import { exec, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import { pathExistsSync } from 'fs-extra';
 import { ConfigService } from '@nestjs/config';
+
+const psList = require('ps-list');
+const fkill = require('fkill');
 
 @Injectable()
 export class DcsServerProcessMonitorService {
@@ -36,29 +39,32 @@ export class DcsServerProcessMonitorService {
 
   async kick() {
     this.logger.log('Killing DCS.exe');
-    const stopResult = await this.stop();
-    stopResult.stdout && this.logger.log(stopResult.stdout);
-    stopResult.stderr && this.logger.warn(stopResult.stderr);
+    await this.stop();
     this.logger.log('Starting DCS.exe');
     await this.start();
   }
 
-  async stop(): Promise<{ stdout: any; stderr: any; error?: any }> {
-    return new Promise((resolve) => {
-      exec(
-        `taskkill /F /IM "${this.configService.get('dcsServer.processName')}"`,
-        (error, stdout, stderr) => {
-          if (error) {
-            resolve({ stdout, stderr, error });
-          } else {
-            resolve({ stdout, stderr });
-          }
-        },
-      );
-    });
+  async stop(): Promise<boolean> {
+    const dcsProcess = await this.getDcsProcess();
+    if (dcsProcess) {
+      await fkill(dcsProcess.pid, { force: true });
+      this.logger.log('Successfully killed DCS.exe');
+      return true;
+    } else {
+      this.logger.log('No DCS.exe process running');
+      return false;
+    }
   }
 
-  async start(): Promise<boolean> {
+  async start(): Promise<{
+    pid: number;
+    ppid: number;
+    name: string;
+  } | void> {
+    if (await this.getDcsProcess()) {
+      return;
+    }
+
     return new Promise((resolve, reject) => {
       const pathToDcs = this.configService.get('dcsServer.launcher');
 
@@ -83,7 +89,18 @@ export class DcsServerProcessMonitorService {
         ],
       });
       child.unref();
-      resolve(true);
+      this.getDcsProcess().then(resolve);
     });
+  }
+
+  public async getDcsProcess(): Promise<{
+    pid: number;
+    ppid: number;
+    name: string;
+  } | void> {
+    const processes = await psList({ all: true });
+    return processes.find(
+      ({ name }) => name === this.configService.get('dcsServer.processName'),
+    );
   }
 }

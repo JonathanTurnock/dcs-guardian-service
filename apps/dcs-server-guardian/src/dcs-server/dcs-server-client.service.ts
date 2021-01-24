@@ -1,15 +1,19 @@
 import { HttpService, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DcsServerClientService {
-  constructor(private httpService: HttpService) {}
+  constructor(
+    private httpService: HttpService,
+    private configService: ConfigService,
+  ) {}
 
   async isRunning() {
     const response = await this.httpService
       .request({
-        url: 'http://falcon.fxq.net:8088/encryptedRequest',
+        url: `${this.configService.get('dcsServer.basePath')}/encryptedRequest`,
         method: 'OPTIONS',
-        timeout: 500,
+        timeout: 1000,
       })
       .toPromise();
     return response.status === 200;

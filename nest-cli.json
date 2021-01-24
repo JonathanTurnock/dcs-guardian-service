@@ -1,4 +1,30 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "apps/dcs-server-guardian/src",
+  "monorepo": true,
+  "root": "apps/dcs-server-guardian",
+  "compilerOptions": {
+    "webpack": false,
+    "tsConfigPath": "apps/dcs-server-guardian/tsconfig.app.json"
+  },
+  "projects": {
+    "dcs-server-guardian": {
+      "type": "application",
+      "root": "apps/dcs-server-guardian",
+      "entryFile": "main",
+      "sourceRoot": "apps/dcs-server-guardian/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/dcs-server-guardian/tsconfig.app.json"
+      }
+    },
+    "dcs-stub": {
+      "type": "application",
+      "root": "apps/dcs-stub",
+      "entryFile": "main",
+      "sourceRoot": "apps/dcs-stub/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/dcs-stub/tsconfig.app.json"
+      }
+    }
+  }
 }
