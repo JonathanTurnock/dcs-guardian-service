@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DcsServerClientService } from './dcs-server-client.service';
-import { spawn } from 'child_process';
-import { pathExistsSync } from 'fs-extra';
 import { ConfigService } from '@nestjs/config';
-
-const psList = require('ps-list');
-const fkill = require('fkill');
+import {
+  ProcessInfo,
+  startDcs,
+  stopDcs,
+  TaskActionResult,
+} from './processActions';
 
 @Injectable()
 export class DcsServerProcessMonitorService {
@@ -44,63 +45,30 @@ export class DcsServerProcessMonitorService {
     await this.start();
   }
 
-  async stop(): Promise<boolean> {
-    const dcsProcess = await this.getDcsProcess();
-    if (dcsProcess) {
-      await fkill(dcsProcess.pid, { force: true });
-      this.logger.log('Successfully killed DCS.exe');
-      return true;
-    } else {
-      this.logger.log('No DCS.exe process running');
-      return false;
+  async stop(): Promise<TaskActionResult<'STOPPED' | 'NOT_RUNNING', void>> {
+    const stopResult = await stopDcs();
+    switch (stopResult.resultInfo) {
+      case 'NOT_RUNNING':
+        this.logger.log('Failed to Stop DCS Server, not currently running');
+        break;
+      case 'STOPPED':
+        this.logger.log('Successfully Stopped DCS Server');
     }
+    return stopResult;
   }
 
-  async start(): Promise<{
-    pid: number;
-    ppid: number;
-    name: string;
-  } | void> {
-    if (await this.getDcsProcess()) {
-      return;
-    }
-
-    return new Promise((resolve, reject) => {
-      const pathToDcs = this.configService.get('dcsServer.launcher');
-
-      this.logger.debug(`DCS Exe Path: ${pathToDcs}`);
-      const exeExists = pathExistsSync(pathToDcs);
-      if (!exeExists) {
-        this.logger.error(
-          `${pathToDcs} is not a valid application path, failed to launch`,
-        );
-        reject(
-          new Error(
-            `${pathToDcs} is not a valid application path, failed to launch`,
-          ),
-        );
-      }
-      const child = spawn(pathToDcs, {
-        detached: true,
-        stdio: [
-          'ignore' /* stdin */,
-          'ignore' /* stdout */,
-          'ignore' /* stderr */,
-        ],
-      });
-      child.unref();
-      this.getDcsProcess().then(resolve);
-    });
-  }
-
-  public async getDcsProcess(): Promise<{
-    pid: number;
-    ppid: number;
-    name: string;
-  } | void> {
-    const processes = await psList({ all: true });
-    return processes.find(
-      ({ name }) => name === this.configService.get('dcsServer.processName'),
+  async start(): Promise<TaskActionResult<'STARTED' | 'RUNNING', ProcessInfo>> {
+    const startResult = await startDcs(
+      this.configService.get('dcsServer.launcher'),
     );
+    switch (startResult.resultInfo) {
+      case 'RUNNING':
+        this.logger.log('Failed to Start DCS Server, already running');
+        break;
+      case 'STARTED':
+        this.logger.log('Successfully Started DCS Server');
+        break;
+    }
+    return startResult;
   }
 }

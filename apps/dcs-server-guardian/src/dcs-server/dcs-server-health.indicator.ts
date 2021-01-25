@@ -6,6 +6,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { DcsServerClientService } from './dcs-server-client.service';
 import { DcsServerProcessMonitorService } from './dcs-server-process-monitor.service';
+import { getDcsProcess } from './processActions';
 
 @Injectable()
 export class DcsServerHealthIndicator extends HealthIndicator {
@@ -28,7 +29,7 @@ export class DcsServerHealthIndicator extends HealthIndicator {
     }
 
     try {
-      process = await this.serverProcessMonitor.getDcsProcess();
+      process = await getDcsProcess();
     } catch (e) {
       process = false;
       errors = { ...errors, processCheck: e.message };

@@ -1,6 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
 import { DcsServerProcessMonitorService } from './dcs-server-process-monitor.service';
 
+const messages: Record<string, string> = {
+  STOPPED: 'DCS Stopped',
+  NOT_RUNNING: 'DCS Not Running',
+  STARTED: 'DCS Server Started',
+  RUNNING: 'DCS Server Already Running',
+};
+
 @Controller('server')
 export class DcsServerController {
   constructor(private pms: DcsServerProcessMonitorService) {}
@@ -9,9 +16,7 @@ export class DcsServerController {
   async stop() {
     const stopResult = await this.pms.stop();
     return {
-      result: stopResult
-        ? 'Successfully Stopped DCS.exe'
-        : 'DCS.exe Not Running',
+      result: messages[stopResult.resultInfo],
     };
   }
 
@@ -19,10 +24,8 @@ export class DcsServerController {
   async start() {
     const startResult = await this.pms.start();
     return {
-      result: startResult
-        ? 'Successfully Started DCS.exe'
-        : 'DCS.exe is already running',
-      processInfo: startResult,
+      result: messages[startResult.resultInfo],
+      data: startResult.data,
     };
   }
 }
