@@ -4,7 +4,7 @@ This application provides overwatch for the DCS Server Application which can the
 monitoring solutions such as [UptimeRobot](https://uptimerobot.com/),
 [CheckMK](https://checkmk.com/) etc
 
-![img](img.png)
+![img](.docs/img.png)
 _(Note you will see a blank screen as only Warn and Error logs are on by default)_
 
 It looks at the Tasklist to see if `DCS.exe` exists, and also sends a request to
@@ -45,7 +45,7 @@ Sample Response from the health endpoint:
 1. On the DCS server host define a `SYSTEM` environment variable named `DCS_LAUNCHER`, this should
    point to the `DCS_updater.exe`
 
-![envar](envar.png)
+![envar](.docs/envar.png)
 
 2. Download and run the exe on the DCS Server host
 
@@ -53,7 +53,7 @@ Sample Response from the health endpoint:
    the app to hang if not disabled
    see https://stackoverflow.com/questions/33883530/why-is-my-command-prompt-freezing-on-windows-10
 
-![qem](qem.png)
+![qem](.docs/qem.png)
 
 Navigate to `http://127.0.0.1:45371/health` in a browser to get the health information for the
 guardian and dcs server
