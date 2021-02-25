@@ -1,15 +1,15 @@
 {
   "name": "dcs-server-guardian",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Digital Combat Simulator Server Guardian App",
   "author": "Jonathan Turnock <Jonathan.Turnock@outlook.com>",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bin": "dist/apps/dcs-server-guardian/main.js",
   "scripts": {
     "prebuild": "yarn clean",
     "clean": "rimraf build dist",
-    "build": "nest build && pkg . --targets win --out-dir dist --debug",
+    "build": "nest build && pkg . --targets win --out-dir dist",
     "build:stub": "nest build dcs-stub && pkg dist/apps/dcs-stub/main.js --targets win --output dist/DCS.exe",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
@@ -31,12 +31,12 @@
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/terminus": "^7.0.1",
     "execa": "^5.0.0",
-    "fkill": "^7.1.0",
     "fs-extra": "^9.1.0",
-    "ps-list": "^7.2.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.6.3"
+    "rxjs": "^6.6.3",
+    "taskkill": "^3.1.0",
+    "tasklist": "^4.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.5.1",
@@ -50,6 +50,7 @@
     "@types/supertest": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
+    "cross-env": "^7.0.3",
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4",
@@ -81,11 +82,6 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/apps/"
-    ]
-  },
-  "pkg": {
-    "assets": [
-      "node_modules/ps-list/vendor/*"
     ]
   }
 }
